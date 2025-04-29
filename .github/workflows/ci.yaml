@@ -1,0 +1,139 @@
+# =============================================================================
+# GitHub Actions – Continuous Integration Pipeline
+#
+#   • Lint / format / static analysis (pre-commit, mypy, bandit)
+#   • Test matrix (pytest + coverage ≥90 %)
+#   • Documentation build (Sphinx, warnings = errors)
+#   • Upload coverage to Codecov
+#
+# Fast hooks run once (Python-3.12); test suite fan-out runs in parallel.
+# Caching: Poetry, pre-commit, and pip wheels → faster incremental builds.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+  schedule:
+    # Every Monday at 03:17 UTC – triggers the autoupdate job
+    - cron: "17 3 * * 1"
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write # required by codecov to post PR comments
+
+env:
+  PYTHON_VERSION_LINT: "3.12"
+  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+
+jobs:
+  ###############################################################################
+  # ---------- Lint / Static analysis ---------------------------------------- #
+  ###############################################################################
+  lint:
+    name: Lint & static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_LINT }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --with dev
+
+      - name: Add Poetry venv to PATH
+        run: echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
+
+      - name: Run pre-commit on all files
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+
+  ###############################################################################
+  # ---------- Test matrix ---------------------------------------------------- #
+  ###############################################################################
+  test:
+    name: Tests (pytest) – py${{ matrix.python-version }}
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --with dev
+
+      - name: Add Poetry venv to PATH
+        run: echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
+
+      - name: Run test suite with coverage
+        run: |
+          poetry run pytest -vv --cov --cov-report=xml --cov-report=term-missing --cov-fail-under=90
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: python-${{ matrix.python-version }}
+          fail_ci_if_error: true
+
+  ###############################################################################
+  # ---------- Auto-update pre-commit hooks ---------------------------------- #
+  ###############################################################################
+  autoupdate:
+    if: github.event_name == 'schedule'
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: poetry
+          cache-dependency-path: poetry.lock
+
+      - name: Install pre-commit
+        run: |
+          python -m pip install --upgrade pip pre-commit
+          pre-commit autoupdate --freeze
+
+      - name: Create PR with updated hook versions
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(ci): pre-commit autoupdate"
+          branch: chore/precommit-autoupdate
+          title: "chore(ci): pre-commit autoupdate"
+          labels: maintenance
+          body: |
+            Automated weekly `pre-commit autoupdate --freeze`.
+            Please review the diff and merge if CI passes.

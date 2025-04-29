@@ -1,0 +1,143 @@
+[tool.poetry]
+name = "quantum-executor"
+version = "0.1.0"
+description = "Quantum Executor: A Unified Interface for Quantum Computing"
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+authors = ["Giuseppe Bisicchia <giuseppe.bisicchia@phd.unipi.it>"]
+keywords = ["quantum", "quantum-computing", "quantum-cloud", "quantum-software-engineering", "quantum-interface"]
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+packages = [{ include = "quantum_executor", from = "src" }]
+
+[tool.poetry.urls]
+homepage = "https://github.com/GBisi/quantum-executor"
+repository = "https://github.com/GBisi/quantum-executor"
+documentation = "https://quantum-executor.readthedocs.io"
+
+[tool.poetry.dependencies]
+python = "^3.12,<=4.0"
+amazon-braket-sdk = "^1.91.2"
+qbraid = { version = "^0.9.5", extras = ["azure"] }
+qiskit = "^2.0.0"
+qiskit-aer = "^0.17.0"
+qiskit-ibm-runtime = "^0.38.0"
+cirq = "^1.5.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+pylint = "^3.3.6"
+poetry-plugin-export = "^1.9.0"
+ipykernel = "^6.29.5"
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
+pytest-timeout = "^2.3.1"
+doc8 = "^1.1.2"
+commitizen = "^4.6.0"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=8.2,<9.0"
+sphinx-autodoc-typehints = ">=2.0.0"
+sphinx-rtd-theme = ">=2.0.0"
+myst-parser = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ----------------------------
+# Formatting & Import Sorting
+# ----------------------------
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+src_paths = ["src"]
+
+# ----------------------------
+# Static Analysis & Linting
+# ----------------------------
+[tool.mypy]
+strict = true
+
+[tool.pylint]
+max-line-length = 120
+
+[tool.autoflake]
+remove-all-unused-imports = false
+in-place = false
+
+# ----------------------------
+# Documentation Validation
+# ----------------------------
+[tool.numpydoc_validation]
+checks = [
+    "all",  # report on everything except those explicitly disabled
+    "ES01", # no extended summary required
+    "EX01", # no examples section required
+    "SA01", # no see-also section required
+]
+override_SS05 = [
+    "^Process ",
+    "^Assess ",
+    "^Access ",
+]
+
+# ----------------------------
+# Test Coverage
+# ----------------------------
+[tool.coverage.run]
+omit = [
+    "*/tmp/*",
+    "*/pytest-*/*",
+    "*/tests/resources/*",
+]
+
+# ----------------------------
+# Ruff (All-in-one Linter)
+# ----------------------------
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+lint.select = [
+  "E","F","I","UP","W","S","B","T20","N","C4","DTZ","PIE","RET",
+  "SIM","ARG","ANN","D","EXE","ISC","PTH","RUF"
+]
+lint.ignore = [
+  "S101", # allow use of assert
+  "D203", # blank line before class
+  "D213", # multi-line summary style
+  "T201", # `print` found
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["quantum_executor"]
+force-single-line = true
+combine-as-imports = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "pep621"
+tag_format = "v$version"
+changelog_file = "CHANGELOG.md"
+update_changelog_on_bump = true
+bump_message = "bump(release): v$new_version"
+major_version_zero = true
+version_scheme = "semver"
+
+[tool.semantic_release]
+commit_message = "chore(release): 🚀 Release v{version}"
+version_toml = [
+    "pyproject.toml:tool.poetry.version"
+]

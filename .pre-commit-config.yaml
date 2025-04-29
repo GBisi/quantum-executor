@@ -1,0 +1,138 @@
+# .pre-commit-config.yaml
+
+fail_fast: false
+default_install_hook_types: [pre-commit, commit-msg]
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: local
+    hooks:
+      - id: update-requirements
+        name: Export Poetry dependencies to requirements.txt
+        entry: |
+          bash -c "poetry export -f requirements.txt --without-hashes -o requirements.txt && \
+                   poetry export --only dev -f requirements.txt --without-hashes -o requirements-dev.txt"
+        language: system
+        stages: [manual]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.7
+    hooks:
+      - id: ruff
+        name: ruff (lint + isort + pyupgrade)
+        args:
+          - --config=pyproject.toml
+          - --fix
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+        args:
+          - --strict
+          - --install-types
+          - --non-interactive
+          - --config-file=pyproject.toml
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint (poetry)
+        entry: poetry run pylint
+        language: system
+        types: [python]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.3
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        args: [-c, pyproject.toml, -r, src]
+        exclude: tests/
+
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.9.0
+    hooks:
+      - id: pip-audit
+        additional_dependencies: [pip-audit~=2.7]
+        stages: [pre-push]
+
+  - repo: https://github.com/PyCQA/doc8
+    rev: v1.1.1
+    hooks:
+      - id: doc8
+        args: ["--config=pyproject.toml"]
+
+  - repo: local
+    hooks:
+      - id: sphinx-build
+        name: Build Sphinx docs (warnings as errors)
+        entry: poetry run sphinx-build -b html -W docs docs/_build/html
+        language: system
+        stages: [pre-push]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-ast
+      - id: check-json
+      - id: check-yaml
+      - id: check-case-conflict
+      - id: mixed-line-ending
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: fix-byte-order-marker
+      - id: detect-private-key
+      - id: debug-statements
+      - id: sort-simple-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args: ["--ignore-words=.codespell-ignore", "--skip=*.po,*.pot,docs/_build,poetry.lock"]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
+    hooks:
+      - id: pyupgrade
+        stages: [manual]
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.6.0
+    hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages: [pre-push]
+
+  - repo: local
+    hooks:
+      - id: pytest-cov
+        name: Run pytest with ≥90% coverage
+        entry: poetry run pytest --cov --cov-report term-missing --cov-fail-under=90
+        language: system
+        types: [python]
+        stages: [pre-push]
+        pass_filenames: false
+        always_run: true
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
+  - repo: local
+    hooks:
+      - id: pre-commit-autoupdate
+        name: Update pre-commit hooks to latest
+        entry: pre-commit autoupdate --freeze
+        language: system
+        stages: [manual]

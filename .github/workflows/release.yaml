@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main        # every commit that lands on main triggers the job
+
+permissions:        # required so the job can tag, create a GitHub Release,
+  contents: write   # and obtain an OIDC-token for PyPI
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    concurrency:                       # avoid race-conditions if several commits arrive quickly
+      group: ${{ github.workflow }}-${{ github.ref_name }}
+      cancel-in-progress: false
+
+    steps:
+      # ────────────────────────────────────────────────────────────────
+      # 1. Checkout the repository with full history (PSR needs tags)
+      # ────────────────────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # IMPORTANT – PSR needs the full history [oai_citation:0‡Python Semantic Release](https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html)
+
+      # ────────────────────────────────────────────────────────────────
+      # 2. Run python-semantic-release (@v9.x) to:
+      #    • inspect commits on main
+      #    • compute next SemVer › bump files › build dists (dist/*)
+      #    • write CHANGELOG.md › commit › tag › push
+      #    • create a GitHub Release with the changelog
+      # ────────────────────────────────────────────────────────────────
+      - name: Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}        # or a PAT if your main branch is protected
+          git_committer_name: "github-actions"
+          git_committer_email: "actions@users.noreply.github.com"
+
+      # (optional) Attach the built wheels/SDist to the GitHub Release
+      - name: Upload dists to GitHub Release
+        if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v9
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.release.outputs.tag }}            # e.g. v1.2.3 [oai_citation:2‡Python Semantic Release](https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html)
+
+      - name: Build distributions
+        run: |
+          python -m pip install build
+          python -m build
+
+      # # ────────────────────────────────────────────────────────────────
+      # # 3. Push the freshly-built artefacts in ./dist to PyPI
+      # # ────────────────────────────────────────────────────────────────
+      - name: Publish to PyPI
+        if: steps.release.outputs.released == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          print-hash: true
