@@ -36,7 +36,7 @@ jobs:
         id: release
         uses: python-semantic-release/python-semantic-release@v9
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}        # or a PAT if your main branch is protected
+          github_token: ${{ secrets.GH_PAT }}        # or a PAT if your main branch is protected
           git_committer_name: "github-actions"
           git_committer_email: "actions@users.noreply.github.com"
 
@@ -45,7 +45,7 @@ jobs:
         if: steps.release.outputs.released == 'true'
         uses: python-semantic-release/publish-action@v9
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
           tag: ${{ steps.release.outputs.tag }}            # e.g. v1.2.3 [oai_citation:2‡Python Semantic Release](https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html)
 
       - name: Build distributions
