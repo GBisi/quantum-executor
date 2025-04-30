@@ -1,7 +1,9 @@
 name: Build Docs # and Deploy
 
 on:
-  workflow_dispatch: # Manual trigger
+  push:
+    branches:
+      - main        # every commit that lands on main triggers the job
 
 # permissions:
 #   contents: write  # Required to push to gh-pages branch

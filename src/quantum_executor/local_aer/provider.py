@@ -49,7 +49,7 @@ class LocalAERProvider(QuantumProvider):  # type: ignore
             simulator=True,
             num_qubits=backend.num_qubits,
             program_spec=program_spec,
-            provider_name="LocalAER",
+            provider_name="Local_AER",
         )
 
     @cached_method  # type: ignore
@@ -127,5 +127,5 @@ class LocalAERProvider(QuantumProvider):  # type: ignore
 
         """
         if not hasattr(self, "_hash"):
-            object.__setattr__(self, "_hash", hash("LocalAER"))
+            object.__setattr__(self, "_hash", hash("Local_AER"))
         return int(self._hash)  # pylint: disable=no-member #type: ignore[unused-ignore]
