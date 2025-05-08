@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantum-executor"
-version = "0.0.0"
+version = "0.0.2"
 description = "Quantum Executor: A Unified Interface for Quantum Computing"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
