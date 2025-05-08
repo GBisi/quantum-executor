@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v0.1.0 (2025-05-08)
+
+### Features
+
+- **executor**: ✨ generate dispatch first-class method
+  ([#4](https://github.com/GBisi/quantum-executor/pull/4),
+  [`cd31209`](https://github.com/GBisi/quantum-executor/commit/cd3120900075a3d23b82e0f21e4d090c23fdc5f1))
+
+* fix(local_aer): :bug: change provider name from localaer to local_aer
+
+* fix(actions): :bug: change release token to PAT
+
+* feat(executor): :sparkles: generate dispatch first-class method
+
+
 ## v0.0.2 (2025-04-30)
 
 ### Bug Fixes
