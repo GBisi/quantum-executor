@@ -42,6 +42,22 @@ class Job:  # pylint: disable=too-few-public-methods
         self.shots: int = shots
         self.configuration: dict[str, Any] = configuration or {}
 
+    def to_dict(self) -> dict[str, Any]:
+        """Return a dictionary representation of the Job.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Dictionary containing job details: id, circuit, shots, and configuration.
+
+        """
+        return {
+            "id": self.id,
+            "circuit": self.circuit,
+            "shots": self.shots,
+            "configuration": self.configuration,
+        }
+
     def __repr__(self) -> str:
         """Return a string representation of the Job.
 
@@ -203,3 +219,17 @@ class Dispatch:
 
         """
         return self._jobs.copy()
+
+    def to_dict(self) -> DispatchDict:
+        """Return a dictionary representation of the Dispatch.
+
+        Returns
+        -------
+        Dict[str, Dict[str, List[Dict[str, Any]]]]
+            Nested dictionary mapping provider -> backend -> list of job-info dicts.
+
+        """
+        return {
+            provider: {backend: [job.to_dict() for job in jobs] for backend, jobs in backends.items()}
+            for provider, backends in self._jobs.items()
+        }

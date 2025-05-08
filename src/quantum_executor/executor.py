@@ -4,6 +4,7 @@ import importlib.util
 import logging
 import threading
 from collections.abc import Callable
+from collections.abc import Sequence
 from concurrent.futures import ProcessPoolExecutor
 from concurrent.futures import as_completed
 from pathlib import Path
@@ -235,10 +236,79 @@ class QuantumExecutor:
         self._policies = load_policies_from_folder(self._policies_folder, raise_exc=self._raise_exc)
         logger.info("QuantumExecutor initialized.")
 
+    def generate_dispatch(  # pylint: disable=too-many-positional-arguments too-many-arguments too-many-locals
+        self,
+        circuits: Any | Sequence[Any],  # noqa: ANN401
+        shots: int | Sequence[int],
+        backends: dict[str, list[str]],
+        split_policy: str = _default_split,
+        split_data: dict[str, Any] | None = None,
+    ) -> tuple[Dispatch, dict[str, Any]]:
+        """Split a circuit into jobs based on the specified split policy.
+
+        Parameters
+        ----------
+        circuits : Any or Sequence[Any]
+            Quantum circuit or list of quantum circuits.
+        shots : int or Sequence[int]
+            Number of shots or list of numbers of shots.
+            If a list, it must match the length of `circuits`.
+            If a single int, all circuits will use the same number of shots.
+        backends : dict[str, list[str]]
+            Provider → list of backends.
+        split_policy : str, optional
+            Which split policy to use.
+        split_data : dict, optional
+            Initial data for split policy.
+
+        Returns
+        -------
+        tuple[Dispatch, dict[str, Any]]
+            A Dispatch object containing the jobs and any updated split data.
+        """
+        if isinstance(circuits, Sequence):
+            circuits = list(circuits)
+            shots_list = [shots] * len(circuits) if isinstance(shots, int) else list(shots)
+
+            if len(shots_list) != len(circuits):
+                raise ValueError(
+                    "When passing multiple circuits, shots must be a single int or a list of the same length."
+                )
+
+            split_fn = self.get_split_policy(split_policy)
+            aggregated: dict[str, dict[str, list[Any]]] = {}
+
+            split_data = split_data or {}
+            for circ, sh in zip(circuits, shots_list, strict=False):
+                disp_i, updated_split_data = split_fn(circ, sh, backends, self._virtual_provider, split_data)
+                split_data = updated_split_data
+                for prov, back_map in disp_i.to_dict().items():
+                    agg_back_map = aggregated.setdefault(prov, {})
+                    for back, jobs in back_map.items():
+                        agg_back_map.setdefault(back, []).extend(jobs)
+
+            return Dispatch(aggregated), split_data or {}
+
+        if isinstance(shots, Sequence) and len(shots) > 1:
+            raise ValueError("When passing a single circuit, shots must be a single int, not a list.")
+        if isinstance(shots, Sequence):
+            shots = shots[0]
+
+        # Single-circuit path
+        split_fn = self.get_split_policy(split_policy)
+        split_data = split_data or {}
+        return split_fn(  # type: ignore[no-any-return]
+            circuits,
+            shots,
+            backends,
+            self._virtual_provider,
+            split_data,
+        )
+
     def run_experiment(  # pylint: disable=too-many-positional-arguments too-many-arguments
         self,
-        circuit: Any,  # noqa: ANN401
-        shots: int,
+        circuits: Any | Sequence[Any],  # noqa: ANN401
+        shots: int | Sequence[int],
         backends: dict[str, list[str]],
         split_policy: str = _default_split,
         merge_policy: str | None = None,
@@ -252,10 +322,12 @@ class QuantumExecutor:
 
         Parameters
         ----------
-        circuit : Any
-            Quantum circuit.
-        shots : int
-            Number of shots.
+        circuits : Any or Sequence[Any]
+            Quantum circuit or list of quantum circuits.
+        shots : int or Sequence[int]
+            Number of shots or list of numbers of shots.
+            If a list, it must match the length of `circuits`.
+            If a single int, all circuits will use the same number of shots.
         backends : dict[str, list[str]]
             Provider → list of backends.
         split_policy : str, optional
@@ -284,14 +356,12 @@ class QuantumExecutor:
             split_policy,
             merge_policy,
         )
-        split_fn = self.get_split_policy(split_policy)
-        split_data = split_data or {}
-        dispatch_obj, updated_split = split_fn(
-            circuit,
-            shots,
-            backends,
-            self._virtual_provider,
-            split_data,
+        dispatch_obj, updated_split = self.generate_dispatch(
+            circuits=circuits,
+            shots=shots,
+            backends=backends,
+            split_policy=split_policy,
+            split_data=split_data,
         )
 
         return self.run_dispatch(
