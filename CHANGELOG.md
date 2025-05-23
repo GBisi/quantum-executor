@@ -1,6 +1,28 @@
 # CHANGELOG
 
 
+## v0.0.2 (2025-04-30)
+
+### Bug Fixes
+
+- **actions**: 🐛 change release token to PAT
+  ([#3](https://github.com/GBisi/quantum-executor/pull/3),
+  [`37f9de3`](https://github.com/GBisi/quantum-executor/commit/37f9de35b0e31a6b35a3d2ba63d6b7dd52c125e9))
+
+* fix(local_aer): :bug: change provider name from localaer to local_aer
+
+* fix(actions): :bug: change release token to PAT
+
+
+## v0.0.1 (2025-04-30)
+
+### Bug Fixes
+
+- **local_aer**: :bug: change provider name from localaer to local_aer
+  ([#1](https://github.com/GBisi/quantum-executor/pull/1),
+  [`0c28bae`](https://github.com/GBisi/quantum-executor/commit/0c28bae99a58351d8932a615e96db78ddecac99a))
+
+
 ## v0.0.0 (2025-04-29)
 
 ### Chores
