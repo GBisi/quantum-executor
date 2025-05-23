@@ -2,8 +2,6 @@ name: Build Docs # and Deploy
 
 on:
   push:
-    branches:
-      - main        # every commit that lands on main triggers the job
 
 # permissions:
 #   contents: write  # Required to push to gh-pages branch
