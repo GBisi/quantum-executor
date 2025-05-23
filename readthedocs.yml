@@ -8,6 +8,7 @@ build:
   commands:
     - pip install poetry
     - poetry install
+    - cd docs && make html
 
 sphinx:
   configuration: docs/conf.py
