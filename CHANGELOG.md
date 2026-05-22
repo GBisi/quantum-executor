@@ -1,6 +1,38 @@
 # CHANGELOG
 
 
+## v0.1.2 (2026-05-22)
+
+### Bug Fixes
+
+- Dependencies and pyproject.toml
+  ([`ec7b81c`](https://github.com/GBisi/quantum-executor/commit/ec7b81caf1d3d8de4875f13afbce33f7cf8aacd2))
+
+
+## v0.1.1 (2025-05-23)
+
+### Documentation
+
+- :bug: updated readthedocs configuration
+  ([`6877da5`](https://github.com/GBisi/quantum-executor/commit/6877da5604e2344863147ec2ebe19726564e8ecb))
+
+- 🐛 updated readthedocs configuration ([#5](https://github.com/GBisi/quantum-executor/pull/5),
+  [`c7f862b`](https://github.com/GBisi/quantum-executor/commit/c7f862ba03f2c71e483e4cc47df62698895d1faf))
+
+* fix(local_aer): :bug: change provider name from localaer to local_aer
+
+* fix(actions): :bug: change release token to PAT
+
+* feat(executor): :sparkles: generate dispatch first-class method
+
+* docs: :bug: updated readthedocs configuration
+
+- 🐛 updated readthedocs configuration ([#6](https://github.com/GBisi/quantum-executor/pull/6),
+  [`3dcc9d6`](https://github.com/GBisi/quantum-executor/commit/3dcc9d684b2f9e346f84ede514b1c59840654407))
+
+* docs: :bug: updated readthedocs configuration
+
+
 ## v0.1.0 (2025-05-08)
 
 ### Features

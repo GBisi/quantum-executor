@@ -1,6 +1,6 @@
 [project]
 name = "quantum-executor"
-version = "0.1.0"
+version = "0.1.2"
 description = "Quantum Executor: A Unified Interface for Quantum Computing"
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
@@ -30,6 +30,7 @@ homepage = "https://github.com/GBisi/quantum-executor"
 repository = "https://github.com/GBisi/quantum-executor"
 documentation = "https://quantum-executor.readthedocs.io"
 
+
 [dependency-groups]
 dev = [
     "commitizen>=4.6.0,<5.0.0",
@@ -52,13 +53,6 @@ docs = [
 [tool.poetry]
 packages = [{ include = "quantum_executor", from = "src" }]
 
-[build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-# ----------------------------
-# Formatting & Import Sorting
-# ----------------------------
 [tool.black]
 line-length = 120
 target-version = ["py312"]
@@ -71,6 +65,7 @@ src_paths = ["src"]
 # ----------------------------
 # Static Analysis & Linting
 # ----------------------------
+
 [tool.mypy]
 strict = true
 
@@ -84,6 +79,7 @@ in-place = false
 # ----------------------------
 # Documentation Validation
 # ----------------------------
+
 [tool.numpydoc_validation]
 checks = [
     "all",  # report on everything except those explicitly disabled
@@ -100,6 +96,7 @@ override_SS05 = [
 # ----------------------------
 # Test Coverage
 # ----------------------------
+
 [tool.coverage.run]
 omit = [
     "*/tmp/*",
@@ -110,6 +107,7 @@ omit = [
 # ----------------------------
 # Ruff (All-in-one Linter)
 # ----------------------------
+
 [tool.ruff]
 target-version = "py312"
 line-length = 120
@@ -132,6 +130,7 @@ combine-as-imports = true
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 version_provider = "pep621"
@@ -147,3 +146,11 @@ commit_message = "chore(release): 🚀 Release v{version}"
 version_toml = [
     "pyproject.toml:project.version"
 ]
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# ----------------------------
+# Formatting & Import Sorting
+# ----------------------------
