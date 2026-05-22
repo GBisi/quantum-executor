@@ -290,8 +290,6 @@ Accessors:
 ```python
 results.get_results()          # dict[str, dict[str, list[dict[str,int]]]]
 results.get_jobs()             # same shape but `JobResult` objects
-# Optional: install pandas first
-results.to_dataframe()         # convenience DataFrame of results
 ```
 
 ---

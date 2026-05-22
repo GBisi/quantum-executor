@@ -1,53 +1,59 @@
-[tool.poetry]
+[project]
 name = "quantum-executor"
 version = "0.1.0"
 description = "Quantum Executor: A Unified Interface for Quantum Computing"
 readme = "README.md"
+requires-python = ">=3.12,<4.0"
 license = "AGPL-3.0-or-later"
-authors = ["Giuseppe Bisicchia <giuseppe.bisicchia@phd.unipi.it>"]
+authors = [
+    { name = "Giuseppe Bisicchia", email = "giuseppe.bisicchia@phd.unipi.it" },
+]
 keywords = ["quantum", "quantum-computing", "quantum-cloud", "quantum-software-engineering", "quantum-interface"]
 classifiers = [
-    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
-packages = [{ include = "quantum_executor", from = "src" }]
+dependencies = [
+    "amazon-braket-sdk>=1.91.2,<2.0.0",
+    "cirq>=1.5.0,<2.0.0",
+    "qbraid[azure]>=0.9.5,<0.10.0",
+    "qbraid-core==0.1.39",
+    "qiskit>=2.0.0,<3.0.0",
+    "qiskit-aer>=0.17.0,<0.18.0",
+    "qiskit-ibm-runtime>=0.38.0,<0.39.0",
+]
 
-[tool.poetry.urls]
+[project.urls]
 homepage = "https://github.com/GBisi/quantum-executor"
 repository = "https://github.com/GBisi/quantum-executor"
 documentation = "https://quantum-executor.readthedocs.io"
 
-[tool.poetry.dependencies]
-python = "^3.12,<=4.0"
-amazon-braket-sdk = "^1.91.2"
-qbraid = { version = "^0.9.5", extras = ["azure"] }
-qiskit = "^2.0.0"
-qiskit-aer = "^0.17.0"
-qiskit-ibm-runtime = "^0.38.0"
-cirq = "^1.5.0"
+[dependency-groups]
+dev = [
+    "commitizen>=4.6.0,<5.0.0",
+    "doc8>=1.1.2,<2.0.0",
+    "ipykernel>=6.29.5,<7.0.0",
+    "poetry-plugin-export>=1.9.0,<2.0.0",
+    "pre-commit>=4.2.0,<5.0.0",
+    "pylint>=3.3.6,<4.0.0",
+    "pytest>=8.3.5,<9.0.0",
+    "pytest-cov>=6.1.1,<7.0.0",
+    "pytest-timeout>=2.3.1,<3.0.0",
+]
+docs = [
+    "myst-parser>=4.0.1,<5.0.0",
+    "sphinx>=8.2,<9.0",
+    "sphinx-autodoc-typehints>=2.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+]
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^4.2.0"
-pylint = "^3.3.6"
-poetry-plugin-export = "^1.9.0"
-ipykernel = "^6.29.5"
-pytest = "^8.3.5"
-pytest-cov = "^6.1.1"
-pytest-timeout = "^2.3.1"
-doc8 = "^1.1.2"
-commitizen = "^4.6.0"
-
-[tool.poetry.group.docs.dependencies]
-sphinx = ">=8.2,<9.0"
-sphinx-autodoc-typehints = ">=2.0.0"
-sphinx-rtd-theme = ">=2.0.0"
-myst-parser = "^4.0.1"
+[tool.poetry]
+packages = [{ include = "quantum_executor", from = "src" }]
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 # ----------------------------
@@ -139,5 +145,5 @@ version_scheme = "semver"
 [tool.semantic_release]
 commit_message = "chore(release): 🚀 Release v{version}"
 version_toml = [
-    "pyproject.toml:tool.poetry.version"
+    "pyproject.toml:project.version"
 ]
